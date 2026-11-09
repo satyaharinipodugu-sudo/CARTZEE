@@ -1,0 +1,13 @@
+# Java build output
+**/target/
+*.class
+
+# Local files
+backened.zip
+.env
+.env.*
+!.env.example
+
+# IDE files
+.idea/
+.vscode/

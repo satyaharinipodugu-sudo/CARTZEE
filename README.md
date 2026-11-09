@@ -39,13 +39,16 @@ CARTZEE – Your Shopping Universe 🛍️ | An AI-enhanced full-stack e-commerc
 ```text
 CARTZEE/
 ├── frontend/
-│   ├── index.html
-│   ├── home.html
 │   ├── css/
 │   │   └── style.css
+│   ├── html/
+│   │   ├── index.html
+│   │   └── Untitled-1.html
 │   └── js/
 │       └── app.js
-├── backend/ (Planned)
+├── backend/
+│   ├── pom.xml
+│   └── src/
 └── README.md
 ```
 
@@ -59,7 +62,7 @@ CARTZEE/
 
 ## Project Status
 
-Currently under development. Frontend development is in progress, with backend integration and advanced features planne
+Currently under development. Frontend and backend development are in progress, with backend integration and advanced features planned.
 
 
 ## Tech – Artificial Intelligence and Machine Learning
