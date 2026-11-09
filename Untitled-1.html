@@ -1,0 +1,237 @@
+
+<script>
+    // CARTZEE JAVA BACKEND URL
+    const API_BASE_URL = "http://localhost:62696";
+
+    // HTML ELEMENTS
+    const loginTab = document.getElementById("login-tab");
+    const signupTab = document.getElementById("signup-tab");
+    const form = document.getElementById("auth-form");
+
+    const nameGroup = document.getElementById("name-group");
+    const mobileGroup = document.getElementById("mobile-group");
+    const confirmGroup = document.getElementById("confirm-group");
+    const loginOptions = document.getElementById("login-options");
+
+    const formTitle = document.getElementById("form-title");
+    const formDescription = document.getElementById("form-description");
+    const submitBtn = document.getElementById("submit-btn");
+    const formMessage = document.getElementById("form-message");
+
+    const backendStatus = document.getElementById("backend-status");
+    const statusDot = document.querySelector(".status-dot");
+
+    let isSignup = false;
+
+    // CHECK BACKEND CONNECTION
+    async function checkBackend() {
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/api/health`
+            );
+
+            if (!response.ok) {
+                throw new Error("Backend unavailable");
+            }
+
+            const message = await response.text();
+
+            backendStatus.textContent = "Backend Connected";
+            statusDot.style.background = "#22c55e";
+
+            console.log(message);
+
+        } catch (error) {
+            backendStatus.textContent = "Backend Disconnected";
+            statusDot.style.background = "#ef4444";
+
+            console.error("Backend Error:", error);
+        }
+    }
+
+    // LOGIN / SIGNUP SWITCH
+    function switchTab(signup) {
+
+        isSignup = signup;
+
+        loginTab.classList.toggle("active", !signup);
+        signupTab.classList.toggle("active", signup);
+
+        nameGroup.hidden = !signup;
+        mobileGroup.hidden = !signup;
+        confirmGroup.hidden = !signup;
+
+        loginOptions.hidden = signup;
+
+        document.getElementById("name").required = signup;
+        document.getElementById("mobile").required = signup;
+        document.getElementById("confirm-password").required = signup;
+
+        formTitle.textContent = signup
+            ? "Create Account"
+            : "Welcome Back!";
+
+        formDescription.textContent = signup
+            ? "Join CARTZEE and discover a smarter shopping experience."
+            : "Sign in to continue your shopping journey.";
+
+        submitBtn.textContent = signup
+            ? "Create My Account →"
+            : "Login to CARTZEE →";
+
+        formMessage.textContent = "";
+        form.reset();
+    }
+
+    loginTab.addEventListener("click", () => switchTab(false));
+    signupTab.addEventListener("click", () => switchTab(true));
+
+    // SHOW / HIDE PASSWORD
+    document.querySelectorAll(".toggle-password").forEach(button => {
+
+        button.addEventListener("click", function() {
+
+            const target = document.getElementById(this.dataset.target);
+
+            const show = target.type === "password";
+
+            target.type = show ? "text" : "password";
+
+            this.setAttribute(
+                "aria-label",
+                show ? "Hide password" : "Show password"
+            );
+
+            this.innerHTML = show
+                ? `<svg viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M3 3l18 18"/>
+                    <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/>
+                    <path d="M9.9 5.2A10.5 10.5 0 0 1 12 5c6.4 0 10 7 10 7"/>
+                    <path d="M6.2 6.2C3.5 8 2 12 2 12s3.6 7 10 7"/>
+                   </svg>`
+                : `<svg viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                   </svg>`;
+        });
+    });
+
+    // FORGOT PASSWORD
+    document.getElementById("forgot-link").addEventListener("click", function(event) {
+        event.preventDefault();
+        formMessage.textContent =
+            "Password recovery is not available yet.";
+    });
+
+    // FORM SUBMISSION
+    form.addEventListener("submit", async function(event) {
+
+        event.preventDefault();
+
+        formMessage.textContent = "";
+
+        const name = document.getElementById("name").value.trim();
+        const mobile = document.getElementById("mobile").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+        const confirmPassword =
+            document.getElementById("confirm-password").value;
+
+        // SIGNUP VALIDATION
+        if (isSignup) {
+
+            if (name.length < 2) {
+                formMessage.textContent = "Enter your full name.";
+                return;
+            }
+
+            if (!/^[6-9][0-9]{9}$/.test(mobile)) {
+                formMessage.textContent =
+                    "Enter a valid 10-digit mobile number.";
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                formMessage.textContent = "Passwords do not match.";
+                return;
+            }
+
+            formMessage.textContent =
+                "Signup API is not created in Java backend yet.";
+
+            return;
+        }
+
+        // LOGIN VALIDATION
+        if (!email || !password) {
+            formMessage.textContent =
+                "Please enter email and password.";
+            return;
+        }
+
+        // CONNECT TO JAVA LOGIN API
+        try {
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Connecting...";
+
+            const response = await fetch(
+                `${API_BASE_URL}/api/auth/login`,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                }
+            );
+
+            const result = await response.text();
+
+            if (!response.ok) {
+                throw new Error(result || "Login failed");
+            }
+
+            formMessage.textContent = result;
+
+            console.log("Backend response:", result);
+
+        } catch (error) {
+
+            formMessage.textContent =
+                "Backend connection failed: " + error.message;
+
+            console.error("Login Error:", error);
+
+        } finally {
+
+            submitBtn.disabled = false;
+
+            submitBtn.textContent = "Login to CARTZEE →";
+        }
+    });
+
+    // GOOGLE BUTTON
+    document.getElementById("google-btn").addEventListener("click", function() {
+        formMessage.textContent =
+            "Google authentication is not configured yet.";
+    });
+
+    // FACEBOOK BUTTON
+    document.getElementById("facebook-btn").addEventListener("click", function() {
+        formMessage.textContent =
+            "Facebook authentication is not configured yet.";
+    });
+
+    // CHECK BACKEND WHEN PAGE LOADS
+    checkBackend();
+</script>
+</body>
+</html>
